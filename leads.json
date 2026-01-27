@@ -1,1 +1,419 @@
-[]
+[
+  {
+    "website": "https://calsakplastics.com/",
+    "emails": [
+      "plasticsla@calsakplastics.com"
+    ],
+    "industry": "Plastics",
+    "timestamp": "2026-01-27T11:35:22.184Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.plasticsunlimited.com/",
+    "emails": [
+      "skingery@plasticsunlimited.com",
+      "dkieffer@plasticsunlimited.com",
+      "travisk@plasticsunlimited.com",
+      "jgregorich@plasticsunlimited.com",
+      "bclarke@plasticsunlimited.com",
+      "cclark@plasticsunlimited.com",
+      "jgrant@plasticsunlimited.com",
+      "wschocker@plasticsunlimited.com"
+    ],
+    "industry": "Plastics",
+    "timestamp": "2026-01-27T11:35:36.579Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.statista.com/topics/1509/museums/",
+    "emails": [
+      "asia.support@statista.com",
+      "eu.support@statista.com",
+      "latam@statista.com"
+    ],
+    "industry": "Museums and Institutions",
+    "timestamp": "2026-01-27T11:38:52.250Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://metallurgy-europe.eu/list-of-all-members/",
+    "emails": [
+      "anders@thermocalc.com",
+      "office@metallurgy-europe.eu"
+    ],
+    "industry": "Metallurgy",
+    "timestamp": "2026-01-27T11:56:59.220Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://manufacturingdigital.com/top10/top-10-electronics-companies",
+    "emails": [
+      "editor@manufacturingdigital.com"
+    ],
+    "industry": "Electronics",
+    "timestamp": "2026-01-27T11:58:22.727Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.raypcb.com/electronic-manufacturing-companies-in-usa/",
+    "emails": [
+      "judy@8pcba.com"
+    ],
+    "industry": "Electronics",
+    "timestamp": "2026-01-27T11:59:09.684Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.usercall.co/post/top-30-market-research-companies-in-the-usa",
+    "emails": [
+      "junu@usercall.co"
+    ],
+    "industry": "Market Research",
+    "timestamp": "2026-01-27T12:00:12.692Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.50pros.com/top-50/market-research",
+    "emails": [
+      "tom@myspace.com"
+    ],
+    "industry": "Market Research",
+    "timestamp": "2026-01-27T12:00:18.094Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://hannarubbercompany.com/",
+    "emails": [
+      "name@email.com"
+    ],
+    "industry": "Rubber",
+    "timestamp": "2026-01-27T12:04:22.078Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.valvekingdom.com/top-best-rubber-product-manufacturers/",
+    "emails": [
+      "sales-5@valvekingdom.com"
+    ],
+    "industry": "Rubber",
+    "timestamp": "2026-01-27T12:04:43.072Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://americanfineartgallery.com/",
+    "emails": [
+      "afa@tobiasse.com",
+      "user@domain.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-01-27T12:08:25.401Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.delucafa.us/",
+    "emails": [
+      "john@delucafa.com",
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "dd0a55ccb8124b9c9d938e3acf41f8aa@sentry.wixpress.com",
+      "c183baa23371454f99f417f6616b724d@sentry.wixpress.com",
+      "88170cb0c9d64f94b5821ca7fd2d55a4@sentry-next.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-01-27T12:09:40.889Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.thefineart.co/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "79baaa8e09c746d2b7401643b99792e0@sentry.wixpress.com",
+      "ed436f5053144538958ad06a5005e99a@sentry.wixpress.com",
+      "460ff4620fa44cba8df530afde949785@sentry.wixpress.com",
+      "9a65e97ebe8141fca0c4fd686f70996b@sentry.wixpress.com",
+      "dd0a55ccb8124b9c9d938e3acf41f8aa@sentry.wixpress.com",
+      "c183baa23371454f99f417f6616b724d@sentry.wixpress.com",
+      "88170cb0c9d64f94b5821ca7fd2d55a4@sentry-next.wixpress.com",
+      "18d2f96d279149989b95faf0a4b41882@sentry-next.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com",
+      "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com",
+      "271e9fa3230b4eec94b02bf95780f5f2@sentry.wixpress.com",
+      "5d1795a2db124a268f1e1bd88f503500@sentry.wixpress.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-01-27T12:09:44.715Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://theamericanfineartcompany.com/",
+    "emails": [
+      "matt@pixelspread.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-01-27T12:09:48.882Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.thefineartcompany.co.uk/fineartprintsshop",
+    "emails": [
+      "enquiries@thefineartcompany.co.uk",
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com",
+      "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-01-27T12:09:56.007Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.americanartco.art/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "9a65e97ebe8141fca0c4fd686f70996b@sentry.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-01-27T12:10:07.444Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.thefineartandframecompany.com/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "dd0a55ccb8124b9c9d938e3acf41f8aa@sentry.wixpress.com",
+      "c183baa23371454f99f417f6616b724d@sentry.wixpress.com",
+      "9a65e97ebe8141fca0c4fd686f70996b@sentry.wixpress.com",
+      "ed436f5053144538958ad06a5005e99a@sentry.wixpress.com",
+      "460ff4620fa44cba8df530afde949785@sentry.wixpress.com",
+      "88170cb0c9d64f94b5821ca7fd2d55a4@sentry-next.wixpress.com",
+      "baf30a2b91654c5a840931f0137bed30@sentry.wixpress.com",
+      "0e6a29e4756740a8a63493e912ba2174@sentry.wixpress.com",
+      "1eeb89147c984dc6bc3ffafd9e6cd089@sentry.wixpress.com",
+      "18d2f96d279149989b95faf0a4b41882@sentry-next.wixpress.com",
+      "463991d7bca24f02a0baf16f9e6eda73@sentry.wixpress.com",
+      "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com",
+      "271e9fa3230b4eec94b02bf95780f5f2@sentry.wixpress.com",
+      "5d1795a2db124a268f1e1bd88f503500@sentry.wixpress.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-01-27T12:10:10.497Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.sasperformingarts.com/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "88170cb0c9d64f94b5821ca7fd2d55a4@sentry-next.wixpress.com",
+      "dd0a55ccb8124b9c9d938e3acf41f8aa@sentry.wixpress.com",
+      "c183baa23371454f99f417f6616b724d@sentry.wixpress.com",
+      "460ff4620fa44cba8df530afde949785@sentry.wixpress.com",
+      "ed436f5053144538958ad06a5005e99a@sentry.wixpress.com",
+      "9a65e97ebe8141fca0c4fd686f70996b@sentry.wixpress.com",
+      "1eeb89147c984dc6bc3ffafd9e6cd089@sentry.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com",
+      "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com",
+      "271e9fa3230b4eec94b02bf95780f5f2@sentry.wixpress.com"
+    ],
+    "industry": "Performing Arts",
+    "timestamp": "2026-01-27T12:19:32.796Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.inspireperformingartscompany.com/",
+    "emails": [
+      "user@domain.com"
+    ],
+    "industry": "Performing Arts",
+    "timestamp": "2026-01-27T12:20:11.549Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://texasperformingarts.org/",
+    "emails": [
+      "Tickets@texasperformingarts.org",
+      "tickets@texasperformingarts.org"
+    ],
+    "industry": "Performing Arts",
+    "timestamp": "2026-01-27T12:20:18.555Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.sacperformingarts.com/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "9a65e97ebe8141fca0c4fd686f70996b@sentry.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
+    ],
+    "industry": "Performing Arts",
+    "timestamp": "2026-01-27T12:20:21.845Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.vocalproductionsnyc.org/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "88170cb0c9d64f94b5821ca7fd2d55a4@sentry-next.wixpress.com",
+      "18d2f96d279149989b95faf0a4b41882@sentry-next.wixpress.com",
+      "9a65e97ebe8141fca0c4fd686f70996b@sentry.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com",
+      "78f7996315bc402f9dcb8a2f974b82d1@sentry.wixpress.com",
+      "5d1795a2db124a268f1e1bd88f503500@sentry.wixpress.com"
+    ],
+    "industry": "Performing Arts",
+    "timestamp": "2026-01-27T12:20:25.237Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.spacompany.org/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
+    ],
+    "industry": "Performing Arts",
+    "timestamp": "2026-01-27T12:20:32.251Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.thesaunderscompany.com/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "18d2f96d279149989b95faf0a4b41882@sentry-next.wixpress.com",
+      "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com",
+      "bfb679c754744c58a7374ee6e25cfc13@sentry.wixpress.com",
+      "5d1795a2db124a268f1e1bd88f503500@sentry.wixpress.com"
+    ],
+    "industry": "Public Relations and Communications",
+    "timestamp": "2026-01-27T12:21:33.738Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.ituproductions.com/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
+    ],
+    "industry": "Media Production",
+    "timestamp": "2026-01-27T12:22:33.978Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.mvmpro.com/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "dd0a55ccb8124b9c9d938e3acf41f8aa@sentry.wixpress.com",
+      "c183baa23371454f99f417f6616b724d@sentry.wixpress.com",
+      "9a65e97ebe8141fca0c4fd686f70996b@sentry.wixpress.com",
+      "ed436f5053144538958ad06a5005e99a@sentry.wixpress.com",
+      "460ff4620fa44cba8df530afde949785@sentry.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com",
+      "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com",
+      "78f7996315bc402f9dcb8a2f974b82d1@sentry.wixpress.com",
+      "bfb679c754744c58a7374ee6e25cfc13@sentry.wixpress.com",
+      "271e9fa3230b4eec94b02bf95780f5f2@sentry.wixpress.com"
+    ],
+    "industry": "Media Production",
+    "timestamp": "2026-01-27T12:22:55.511Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://thehealthcaretechnologyreport.com/the-top-25-biotechnology-companies-of-2024/",
+    "emails": [
+      "customerservice@thehealthcaretechnologyreport.com"
+    ],
+    "industry": "Biotechnology",
+    "timestamp": "2026-01-27T12:25:38.652Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.namadr.com/",
+    "emails": [
+      "customerservice@namadr.com"
+    ],
+    "industry": "Alternative Dispute Resolution",
+    "timestamp": "2026-01-27T12:27:53.088Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.nortonrosefulbright.com/en-us/services/357d79cb/alternative-dispute-resolution-adr",
+    "emails": [
+      "kevin.ogorman@nortonrosefulbright.com"
+    ],
+    "industry": "Alternative Dispute Resolution",
+    "timestamp": "2026-01-27T12:27:57.398Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://disputeresolution.org/",
+    "emails": [
+      "astro@bigpond.net.au"
+    ],
+    "industry": "Alternative Dispute Resolution",
+    "timestamp": "2026-01-27T12:28:05.956Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.lowenstein.com/practices-sectors/alternative-dispute-resolution",
+    "emails": [
+      "webmaster@lowenstein.com"
+    ],
+    "industry": "Alternative Dispute Resolution",
+    "timestamp": "2026-01-27T12:28:22.233Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://alternativelaw.com/adr-services/",
+    "emails": [
+      "mediation@alternativelaw.com",
+      "DWebbert@johnsonwebbert.com",
+      "slangsdorf@preti.com"
+    ],
+    "industry": "Alternative Dispute Resolution",
+    "timestamp": "2026-01-27T12:28:33.953Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.womblebonddickinson.com/us/services/litigation-and-dispute-resolution/alternative-dispute-resolution",
+    "emails": [
+      "lisa.rushton@wbd-us.com",
+      "Doug.Tumminello@wbd-us.com"
+    ],
+    "industry": "Alternative Dispute Resolution",
+    "timestamp": "2026-01-27T12:28:48.183Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  }
+]
