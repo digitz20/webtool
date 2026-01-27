@@ -538,5 +538,68 @@
     "timestamp": "2026-01-27T12:47:25.532Z",
     "emailsSent": false,
     "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.apawood.org/manufacturer-directory",
+    "emails": [
+      "brandon.carr@apawood.org"
+    ],
+    "industry": "Wood",
+    "timestamp": "2026-01-27T12:48:44.591Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.jrautomation.com/",
+    "emails": [
+      "solutions@jrautomation.com"
+    ],
+    "industry": "Industrial Automation",
+    "timestamp": "2026-01-27T12:50:01.490Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://aimagazine.com/technology/top-10-industrial-automation-companies",
+    "emails": [
+      "editor@aimagazine.com"
+    ],
+    "industry": "Industrial Automation",
+    "timestamp": "2026-01-27T12:50:23.177Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.driftwoodhospitality.com/",
+    "emails": [
+      "forms@tambourine.com"
+    ],
+    "industry": "Hospitality",
+    "timestamp": "2026-01-27T12:51:32.869Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.hospitalityfirm.com/",
+    "emails": [
+      "advisor@hospitalityfirm.com",
+      "user@domain.com",
+      "alex@onehospitalityfirm.com"
+    ],
+    "industry": "Hospitality",
+    "timestamp": "2026-01-27T12:53:28.901Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.bankofamerica.com/",
+    "emails": [
+      "wealthmanagement@bankofamerica.com",
+      "xxx@xxx.xxx"
+    ],
+    "industry": "Banking",
+    "timestamp": "2026-01-27T12:55:22.126Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
   }
 ]

@@ -47,6 +47,7 @@ const CONFIG = {
     
   ],
   googleResultsPerSearch: 20,
+  emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   workingHours: { start: 8, end: 18 },
   workingDays: [1, 2, 3, 4, 5],
   searchTlds: [
@@ -306,7 +307,7 @@ async function emailQueueProcessor() {
       if (success) {
         console.log(`Successfully sent email to ${email}, marking as sent.`);
         lead.sentEmailLinks.push(email);
-        await wait(randomInt(5000, 10000));
+        await wait(randomInt(CONFIG.emailDelay.min, CONFIG.emailDelay.max));
       } else {
         // If sending failed because of a limit, we should stop. The processor will pick it up next time.
         if (emailSendingPaused) {
