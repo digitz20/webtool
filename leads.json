@@ -415,5 +415,128 @@
     "timestamp": "2026-01-27T12:28:48.183Z",
     "emailsSent": false,
     "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.trustpilot.com/categories/religious_institutions",
+    "emails": [
+      "missiontrips@experiencemission.org",
+      "reviews@davidccook.org",
+      "nebula.support@nebulahoroscope.com",
+      "social@spiritualblossom.com"
+    ],
+    "industry": "Religious Institutions",
+    "timestamp": "2026-01-27T12:36:49.965Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://leadiq.com/c/company-search/industry-Religious%20Institutions",
+    "emails": [
+      "name@company.com"
+    ],
+    "industry": "Religious Institutions",
+    "timestamp": "2026-01-27T12:36:53.654Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://philanthropycompany.com/",
+    "emails": [
+      "enquiries@philanthropycompany.com"
+    ],
+    "industry": "Philanthropy",
+    "timestamp": "2026-01-27T12:40:38.098Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.case.org/resources/partners/philanthropy-company",
+    "emails": [
+      "gordon@philanthropycompany.com"
+    ],
+    "industry": "Philanthropy",
+    "timestamp": "2026-01-27T12:40:46.954Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.philanthropyshop.com/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "dd0a55ccb8124b9c9d938e3acf41f8aa@sentry.wixpress.com",
+      "c183baa23371454f99f417f6616b724d@sentry.wixpress.com",
+      "9a65e97ebe8141fca0c4fd686f70996b@sentry.wixpress.com",
+      "79baaa8e09c746d2b7401643b99792e0@sentry.wixpress.com",
+      "18d2f96d279149989b95faf0a4b41882@sentry-next.wixpress.com",
+      "78f7996315bc402f9dcb8a2f974b82d1@sentry.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com",
+      "5d1795a2db124a268f1e1bd88f503500@sentry.wixpress.com",
+      "example@mysite.com"
+    ],
+    "industry": "Philanthropy",
+    "timestamp": "2026-01-27T12:40:58.615Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.csiinvestigators.com/",
+    "emails": [
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "dd0a55ccb8124b9c9d938e3acf41f8aa@sentry.wixpress.com",
+      "c183baa23371454f99f417f6616b724d@sentry.wixpress.com",
+      "88170cb0c9d64f94b5821ca7fd2d55a4@sentry-next.wixpress.com",
+      "9a65e97ebe8141fca0c4fd686f70996b@sentry.wixpress.com",
+      "ed436f5053144538958ad06a5005e99a@sentry.wixpress.com",
+      "460ff4620fa44cba8df530afde949785@sentry.wixpress.com",
+      "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com",
+      "271e9fa3230b4eec94b02bf95780f5f2@sentry.wixpress.com"
+    ],
+    "industry": "Security and Investigations",
+    "timestamp": "2026-01-27T12:41:56.198Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://asiprotects.com/",
+    "emails": [
+      "steven@asiprotects.com",
+      "joshua@asiprotects.com"
+    ],
+    "industry": "Security and Investigations",
+    "timestamp": "2026-01-27T12:42:04.169Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://library.doc.gov/company/research",
+    "emails": [
+      "research@doc.gov"
+    ],
+    "industry": "Research",
+    "timestamp": "2026-01-27T12:45:46.818Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://wood.com/",
+    "emails": [
+      "bratislava@wood.com"
+    ],
+    "industry": "Wood",
+    "timestamp": "2026-01-27T12:47:12.312Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.woodcompany.it/",
+    "emails": [
+      "ecom-swiper@11.css",
+      "ecom-swiper@11.0.5.js"
+    ],
+    "industry": "Wood",
+    "timestamp": "2026-01-27T12:47:25.532Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
   }
 ]

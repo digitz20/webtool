@@ -188,33 +188,30 @@ async function sendEmail(to, lead) {
   } catch (error) {
     console.error(`❌ Error sending email to ${to} from ${emailAccounts[currentAccountIndex].user}:`, error);
 
-    const isLimitError = (error.responseCode === 550 || (error.response && error.response.includes('Daily user sending limit exceeded')));
+    // Any error will cause a switch to the next account.
+    console.log(`🚫 Error with account ${emailAccounts[currentAccountIndex].user}. Switching to the next one.`);
 
-    if (isLimitError) {
-      console.log(`🚫 Gmail daily limit exceeded for ${emailAccounts[currentAccountIndex].user}.`);
-      
-      // Mark this account as limited
-      emailAccounts[currentAccountIndex].limitExceeded = true;
+    // Mark this account as having an issue
+    emailAccounts[currentAccountIndex].limitExceeded = true;
 
-      // Try to switch to the next available account
-      const nextAccountIndex = emailAccounts.findIndex(acc => !acc.limitExceeded);
+    // Try to switch to the next available account
+    const nextAccountIndex = emailAccounts.findIndex(acc => !acc.limitExceeded);
 
-      if (nextAccountIndex !== -1) {
-        console.log('Switching to the next available email account...');
-        currentAccountIndex = nextAccountIndex;
-        setupTransporter(); // Re-initialize transporter with the new account
-      } else {
-        // All accounts have hit their limits
-        console.log('🚫 All email accounts have reached their daily sending limits. Pausing email sending and switching to hourly check mode.');
-        emailSendingPaused = true;
-        limitCheckPaused = true; // Enter probing mode
+    if (nextAccountIndex !== -1) {
+      console.log('Switching to the next available email account...');
+      currentAccountIndex = nextAccountIndex;
+      setupTransporter(); // Re-initialize transporter with the new account
+    } else {
+      // All accounts have hit their limits
+      console.log('🚫 All email accounts have reached their daily sending limits. Pausing email sending and switching to hourly check mode.');
+      emailSendingPaused = true;
+      limitCheckPaused = true; // Enter probing mode
 
-        // Reset limit flags for the next day's probing
-        emailAccounts.forEach(acc => acc.limitExceeded = false);
+      // Reset limit flags for the next day's probing
+      emailAccounts.forEach(acc => acc.limitExceeded = false);
 
-        if (probeInterval) clearInterval(probeInterval);
-        probeInterval = setInterval(probeEmailQueue, 60 * 60 * 1000); // Check every hour
-      }
+      if (probeInterval) clearInterval(probeInterval);
+      probeInterval = setInterval(probeEmailQueue, 60 * 60 * 1000); // Check every hour
     }
     return false;
   }
