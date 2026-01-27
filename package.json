@@ -1,0 +1,25 @@
+{
+  "name": "lead-scraper-ui",
+  "version": "1.0.0",
+  "description": "A desktop application for scraping leads.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "automation",
+    "scraper",
+    "puppeteer"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "nodemailer": "^6.6.3",
+    "puppeteer": "^10.4.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "socket.io": "^4.8.3"
+  }
+}
