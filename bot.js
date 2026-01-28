@@ -579,12 +579,11 @@ async function extractEmailsFromWebsite(url, browser) {
           success = true;
           break;
         } catch (err) {
-          if (err.name === 'TimeoutError' || err.message.includes('net::ERR_CONNECTION_TIMED_OUT')) {
-            console.log(`-- Skipping website due to timeout: ${currentUrl}`);
-          } else {
+          const isTimeout = err.name === 'TimeoutError' || err.message.includes('net::ERR_CONNECTION_TIMED_OUT');
+          if (!isTimeout) {
             console.log(`Attempt ${i + 1} failed for ${currentUrl}: ${err.message}`);
           }
-          if (i === 2) {
+          if (i === 2 && !isTimeout) {
             console.log(`Failed to visit ${currentUrl} after 3 attempts.`);
           }
         }
@@ -592,7 +591,7 @@ async function extractEmailsFromWebsite(url, browser) {
     }
   } catch (error) {
     if (error.name === 'TimeoutError' || error.message.includes('net::ERR_CONNECTION_TIMED_OUT')) {
-      console.log(`-- Skipping website due to timeout: ${url}`);
+      // Silently ignore timeout on initial URL load
     } else {
       console.error(`An error occurred while extracting emails from ${url}:`, error);
     }
