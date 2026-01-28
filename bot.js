@@ -269,6 +269,10 @@ async function probeEmailQueue() {
 const sentEmailsGlobal = new Set();
 
 async function emailQueueProcessor() {
+  if (!isAllowedTime()) {
+    console.log('⏰ Outside of working hours. Email queue processor will not run.');
+    return;
+  }
   if (emailSendingPaused || limitCheckPaused) {
     console.log('Email queue processor is currently paused.');
     return;
@@ -382,9 +386,15 @@ const randomInt = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 function isAllowedTime() {
   const now = new Date();
-  const day = now.getDay();
+  const day = now.getDay(); // Sunday is 0, Monday is 1, etc.
   const hour = now.getHours();
-  return CONFIG.workingDays.includes(day) && hour >= CONFIG.workingHours.start && hour < CONFIG.workingHours.end;
+  const isDayAllowed = CONFIG.workingDays.includes(day);
+  const isHourAllowed = hour >= CONFIG.workingHours.start && hour < CONFIG.workingHours.end;
+  const allowed = isDayAllowed && isHourAllowed;
+
+  console.log(`Time Check: Now=${now.toLocaleString()}, Day=${day}(Allowed:${isDayAllowed}), Hour=${hour}(Allowed:${isHourAllowed}) -> Sending Allowed: ${allowed}`);
+
+  return allowed;
 }
 
 function isValidDomain(domain) {
