@@ -579,7 +579,7 @@ async function extractEmailsFromWebsite(url, browser) {
           success = true;
           break;
         } catch (err) {
-          const isTimeout = err.name === 'TimeoutError' || err.message.includes('net::ERR_CONNECTION_TIMED_OUT');
+          const isTimeout = err.name === 'TimeoutError' || err.message.includes('net::ERR_CONNECTION_TIMED_OUT') || err.message.includes('net::ERR_NAME_NOT_RESOLVED') || err.message.includes('net::ERR_CONNECTION_REFUSED');
           if (!isTimeout) {
             console.log(`Attempt ${i + 1} failed for ${currentUrl}: ${err.message}`);
           }
@@ -590,14 +590,14 @@ async function extractEmailsFromWebsite(url, browser) {
       }
     }
   } catch (error) {
-    if (error.name === 'TimeoutError' || error.message.includes('net::ERR_CONNECTION_TIMED_OUT')) {
+    if (error.name === 'TimeoutError' || error.message.includes('net::ERR_CONNECTION_TIMED_OUT') || error.message.includes('net::ERR_NAME_NOT_RESOLVED')) {
       // Silently ignore timeout on initial URL load
     } else {
       console.error(`An error occurred while extracting emails from ${url}:`, error);
     }
     return []; // Return an empty array in case of an error
   } finally {
-    if (page) {
+    if (page && !page.isClosed()) {
       await page.close();
     }
   }
