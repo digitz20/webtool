@@ -319,9 +319,11 @@ async function emailQueueProcessor() {
         continue;
     }
 
-    console.log(`Lead ${lead.website} has ${emailsToSend.length} email(s) to send.`);
+    const uniqueEmailsToSend = [...new Set(emailsToSend)];
 
-    for (const email of emailsToSend) {
+    console.log(`Lead ${lead.website} has ${uniqueEmailsToSend.length} unique email(s) to send.`);
+
+    for (const email of uniqueEmailsToSend) {
       if (emailSendingPaused) {
         console.log('Email sending paused. Saving progress and stopping processor.');
         saveLeads(leads); // Save progress
