@@ -437,11 +437,14 @@ async function getWebsitesByIndustry(industry, browser) {
       page = await browser.newPage();
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
-      const query = `"${industry}" company site:.${tld}`;
-      const searchUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-      await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
+      await page.goto('https://duckduckgo.com/', { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('#search_form_input_homepage');
+      await page.type('#search_form_input_homepage', `"${industry}" company site:.${tld}`);
+      await page.keyboard.press('Enter');
+      await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('a[data-testid="result-title-a"]');
 
-      const links = await page.$$eval('a.result__a', anchors =>
+      const links = await page.$$eval('a[data-testid="result-title-a"]', anchors =>
         anchors.map(a => a.href)
       );
 
