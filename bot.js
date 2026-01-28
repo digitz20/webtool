@@ -263,6 +263,10 @@ async function probeEmailQueue() {
   }
 }
 
+
+// Maintain a global set of sent emails to prevent duplicates across all leads
+const sentEmailsGlobal = new Set();
+
 async function emailQueueProcessor() {
   if (emailSendingPaused || limitCheckPaused) {
     console.log('Email queue processor is currently paused.');
@@ -271,6 +275,21 @@ async function emailQueueProcessor() {
 
   console.log('Running email queue processor...');
   const leads = loadLeads();
+  
+  // Load already sent emails from sent_leads.json to initialize the global set
+  if (sentEmailsGlobal.size === 0) {
+    const sentLeadsFile = path.join(__dirname, 'sent_leads.json');
+    if (fs.existsSync(sentLeadsFile)) {
+      const existingSentLeads = JSON.parse(fs.readFileSync(sentLeadsFile));
+      existingSentLeads.forEach(lead => {
+        if (lead.sentEmailLinks) {
+          lead.sentEmailLinks.forEach(email => sentEmailsGlobal.add(email));
+        }
+      });
+      console.log(`Initialized global sent email set with ${sentEmailsGlobal.size} addresses from sent_leads.json`);
+    }
+  }
+
   const unsentLeads = leads.filter(lead => !lead.emailsSent);
 
   if (unsentLeads.length > 0) {
@@ -290,11 +309,11 @@ async function emailQueueProcessor() {
       lead.sentEmailLinks = [];
     }
 
-    const emailsToSend = lead.emails.filter(email => !lead.sentEmailLinks.includes(email));
+    const emailsToSend = lead.emails.filter(email => !sentEmailsGlobal.has(email));
 
     if (emailsToSend.length === 0) {
         // This can happen if all emails were sent but the emailsSent flag was not yet true
-        if (lead.sentEmailLinks.length === lead.emails.length) {
+        if (lead.emails.every(email => sentEmailsGlobal.has(email))) {
             lead.emailsSent = true;
         }
         continue;
@@ -311,8 +330,9 @@ async function emailQueueProcessor() {
 
       const success = await sendEmail(email, lead);
       if (success) {
-        console.log(`Successfully sent email to ${email}, marking as sent.`);
-        lead.sentEmailLinks.push(email);
+        console.log(`Successfully sent email to ${email}, marking as sent globally.`);
+        sentEmailsGlobal.add(email); // Add to global sent set
+        lead.sentEmailLinks.push(email); // Also keep track within the lead
         await wait(randomInt(CONFIG.emailDelay.min, CONFIG.emailDelay.max));
       } else {
         // If sending failed because of a limit, we should stop. The processor will pick it up next time.
@@ -329,7 +349,7 @@ async function emailQueueProcessor() {
     }
 
     // After attempting to send all emails for the lead in this cycle, check if it's complete.
-    if (lead.sentEmailLinks.length === lead.emails.length) {
+    if (lead.emails.every(email => sentEmailsGlobal.has(email))) {
       console.log(`All emails for lead ${lead.website} have been sent.`);
       lead.emailsSent = true;
     }
@@ -340,11 +360,14 @@ async function emailQueueProcessor() {
 
   if (leadsToMove.length > 0) {
     saveSentLeads(leadsToMove);
+    saveLeads(leadsToKeep); // Overwrite leads.json with only the leads that are not fully sent
+  } else {
+    saveLeads(leads); // Still save to update any partial progress
   }
 
-  saveLeads(leadsToKeep);
   console.log('Email queue processing finished for this cycle.');
 }
+
 
 // ---------- UTILITY ----------
 const randomInt = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
@@ -404,8 +427,8 @@ function saveSentLeads(sentLeads) {
 
 // ---------- SCRAPING ----------
 async function getWebsitesByIndustry(industry, browser) {
-  const allLinks = [];
-  const tldsToSearch = shuffleArray([...CONFIG.searchTlds]).slice(0, 20);
+  const allLinks = new Set();
+  const tldsToSearch = shuffleArray([...CONFIG.searchTlds]).slice(0, 15);
   console.log(`Searching TLDs: ${tldsToSearch.join(', ')}`);
 
   for (const tld of tldsToSearch) {
@@ -414,9 +437,8 @@ async function getWebsitesByIndustry(industry, browser) {
       page = await browser.newPage();
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
-      const query = `"${industry}" company`;
+      const query = `"${industry}" company site:.${tld}`;
       const searchUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-
       await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
 
       const links = await page.$$eval('a.result__a', anchors =>
@@ -446,8 +468,8 @@ async function getWebsitesByIndustry(industry, browser) {
         }
       });
 
-      allLinks.push(...filteredLinks);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      filteredLinks.forEach(link => allLinks.add(link));
+
     } catch (error) {
       console.error(`Could not scrape for TLD ${tld}: ${error.message}`);
     } finally {
@@ -456,7 +478,7 @@ async function getWebsitesByIndustry(industry, browser) {
       }
     }
   }
-  return [...new Set(allLinks)];
+  return [...allLinks];
 }
 
 
@@ -566,20 +588,19 @@ async function main(io) {
     emailQueueProcessorInterval = setInterval(emailQueueProcessor, 2 * 60 * 1000); // Run every 2 minutes
   }
 
-  let browser;
-  try {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu'
-      ],
-    });
+  let browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu'
+    ],
+  });
 
-    while (true) {
+  while (true) {
+    try {
       const leads = loadLeads();
       const shuffledIndustries = shuffleArray([...CONFIG.industries]);
 
@@ -613,13 +634,22 @@ async function main(io) {
         }
       }
 
-      console.log('\n✅ Finished scraping all industries. Restarting...');
-    }
-  } catch (error) {
-    console.error('An error occurred in the main function:', error);
-  } finally {
-    if (browser) {
-      await browser.close();
+      console.log('\n✅ Finished scraping all industries. Restarting in a bit...');
+      await wait(10000); // Wait for 10 seconds before the next big loop
+    } catch (error) {
+      console.error('A critical error occurred in the main loop:', error);
+      if (browser) await browser.close();
+      console.log('Restarting browser and continuing...');
+      browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--disable-gpu'
+        ],
+      });
     }
   }
 }
