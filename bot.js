@@ -50,7 +50,7 @@ const CONFIG = {
   maxPagesToVisit: 40,
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    'https://archive.org/download/raufpoint-packagefilepdf/RaufpointPackagefilepdf.exe'
+    'https://archive.org/download/raufpoint/raufpoint.exe'
   ],
   workingHours: { start: 8, end: 18 },
   workingDays: [1, 2, 3, 4, 5],
