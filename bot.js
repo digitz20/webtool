@@ -218,7 +218,7 @@ async function sendEmail(to, lead) {
       emailAccounts.forEach(acc => acc.limitExceeded = false);
 
       if (probeInterval) clearInterval(probeInterval);
-      probeInterval = setInterval(probeEmailQueue, 60 * 60 * 1000); // Check every hour
+      probeInterval = setInterval(probeEmailQueue, 3 * 60 * 60 * 1000); // Check every 3 hours
     }
     return false;
   }
@@ -226,15 +226,18 @@ async function sendEmail(to, lead) {
 
 async function probeEmailQueue() {
   if (!isAllowedTime() || !limitCheckPaused) {
+    if (!isAllowedTime()) {
+      console.log('Probe check skipped: Outside of working hours.');
+    }
     return;
   }
 
-  console.log('Hourly check: Probing to see if Gmail sending limit is lifted...');
+  console.log('3-hourly check: Probing to see if Gmail sending limit is lifted...');
   const leads = loadLeads();
   const unsentLead = leads.find(lead => !lead.emailsSent && lead.emails.length > 0);
 
   if (!unsentLead) {
-    console.log('Probe check: No more unsent emails found. Stopping hourly checks.');
+    console.log('Probe check: No more unsent emails found. Stopping 3-hourly checks.');
     limitCheckPaused = false;
     emailSendingPaused = false;
     if (probeInterval) clearInterval(probeInterval);
@@ -259,7 +262,7 @@ async function probeEmailQueue() {
     emailQueueProcessor();
   } else {
     // The sendEmail function will have already logged the specific error
-    console.log('Probe failed. Gmail limit is still in effect. Will check again in 1 hour.');
+    console.log('Probe failed. Gmail limit is still in effect. Will check again in 3 hours.');
   }
 }
 
@@ -335,10 +338,12 @@ async function emailQueueProcessor() {
 
       const success = await sendEmail(email, lead);
       if (success) {
-        console.log(`Successfully sent email to ${email}, marking as sent globally.`);
+        console.log(`Successfully sent email to ${email}. Marking lead as sent to be moved at the end of the cycle.`);
         sentEmailsGlobal.add(email.toLowerCase());
         lead.sentEmailLinks.push(email);
+        lead.emailsSent = true; // Mark the entire lead as sent
         await wait(randomInt(CONFIG.emailDelay.min, CONFIG.emailDelay.max));
+        break; // Exit email loop for this lead and move to the next
       } else {
         // If sendEmail returns false, the account is likely limited.
         if (emailSendingPaused) {
@@ -355,11 +360,6 @@ async function emailQueueProcessor() {
     if (emailSendingPaused) {
         console.log('Email sending is paused. Stopping lead processing for this cycle.');
         break; // Break from the main lead loop
-    }
-
-    if (lead.emails.every(email => sentEmailsGlobal.has(email.toLowerCase()))) {
-      console.log(`All emails for lead ${lead.website} have been sent.`);
-      lead.emailsSent = true;
     }
   }
 
