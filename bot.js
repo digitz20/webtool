@@ -6,7 +6,8 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 const fs = require('fs');
 const path = require('path');
-const Brevo = require('@getbrevo/brevo');
+const nodemailer = require('nodemailer');
+
 
 // ---------- CONFIG ----------
 const CONFIG = {
@@ -110,27 +111,54 @@ let currentAccountIndex = 0;
 
 // Load email accounts from .env
 for (let i = 1; i <= 10; i++) { // Assuming a max of 10 accounts
-  const apiKey = process.env[`BREVO_API_KEY_${i}`];
-  const senderEmail = process.env[`BREVO_SENDER_EMAIL_${i}`];
-  if (apiKey && senderEmail) {
-    emailAccounts.push({ apiKey, senderEmail, limitExceeded: false });
+  const smtpHost = process.env[`GMAIL_SMTP_HOST_${i}`];
+  const smtpPort = process.env[`GMAIL_SMTP_PORT_${i}`];
+  const smtpUser = process.env[`GMAIL_SMTP_USER_${i}`];
+  const smtpPass = process.env[`GMAIL_SMTP_PASS_${i}`];
+  const senderEmail = process.env[`GMAIL_SENDER_EMAIL_${i}`];
+
+  if (smtpHost && smtpPort && smtpUser && smtpPass && senderEmail) {
+    emailAccounts.push({
+      smtpHost,
+      smtpPort: parseInt(smtpPort),
+      smtpUser,
+      smtpPass,
+      senderEmail,
+      limitExceeded: false,
+      emailsSentToday: 0, // New counter for emails sent today
+      transporter: null // Will be created on first use
+    });
   } else {
     break; // Stop if we can't find the next account
   }
 }
 
 if (emailAccounts.length === 0) {
-  console.error("❌ No Brevo accounts configured. Please set BREVO_API_KEY_1 and BREVO_SENDER_EMAIL_1 in your .env file.");
+  console.error("❌No Gmail SMTP accounts configured. Please set GMAIL_SMTP_HOST_1, GMAIL_SMTP_PORT_1, GMAIL_SMTP_USER_1, GMAIL_SMTP_PASS_1, and GMAIL_SENDER_EMAIL_1 in your .env file.");
   process.exit(1);
 }
 
-console.log(`✅ Loaded ${emailAccounts.length} Brevo accounts.`);
+console.log(`[SUCCESS]✅ Loaded ${emailAccounts.length} Gmail SMTP accounts.`);
 
 let emailSendingPaused = false;
 let limitCheckPaused = false; // New state for hourly checking
 let emailQueueProcessorInterval; // To hold the interval ID
 let pauseTimeout;
 let probeInterval;
+
+// Helper to create transporter
+function createTransporter(account) {
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com', // Gmail SMTP host
+    port: account.smtpPort,
+    secure: account.smtpPort === 465, // Use SSL if port is 465
+    auth: {
+      user: account.smtpUser,
+      pass: account.smtpPass,
+    },
+  });
+}
+
 
 // ---------- EMAIL FUNCTION ----------
 async function sendEmail(to, lead) {
@@ -139,13 +167,16 @@ async function sendEmail(to, lead) {
     return false;
   }
   if (!isAllowedTime()) {
-    console.log(`⏰ Not within working hours. Email to ${to} will be skipped.`);
+    console.log(`[INFO]⏰ Not within working hours. Email to ${to} will be skipped.`);
     return false;
   }
 
   const account = emailAccounts[currentAccountIndex];
-  const apiInstance = new Brevo.TransactionalEmailsApi();
-  apiInstance.apiClient.authentications['api-key'].apiKey = account.apiKey;
+  
+   // Create transporter if it doesn't exist for this account
+  if (!account.transporter) {
+    account.transporter = createTransporter(account);
+  }
 
   const emailTemplate = fs.readFileSync(path.join(__dirname, 'email_template.html'), 'utf-8');
   const randomLink = CONFIG.emailLinks[Math.floor(Math.random() * CONFIG.emailLinks.length)];
@@ -155,52 +186,65 @@ async function sendEmail(to, lead) {
     .replace('{email_user}', to.split('@')[0])
     .replace('{timestamp}', new Date().toLocaleString());
 
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
-  sendSmtpEmail.to = [{ email: to }];
-  sendSmtpEmail.sender = { email: account.senderEmail };
-  sendSmtpEmail.subject = 'Following up on your interest';
-  sendSmtpEmail.htmlContent = htmlContent;
+  const mailOptions = {
+    from: account.senderEmail,
+    to: to,
+    subject: 'Following up on your interest',
+    html: htmlContent,
+  };
 
   try {
-    await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log(`✅ Email sent to ${to} from ${account.senderEmail} using Brevo.`);
+    await account.transporter.sendMail(mailOptions);
+    console.log(`[SUCCESS]✅ Email sent to ${to} from ${account.senderEmail} using Gmail SMTP.`);
+    account.emailsSentToday++; // Increment counter
+    if (account.emailsSentToday >= 400) {
+      console.log(`[INFO] Account ${account.senderEmail} has reached its 400 email limit for today. Switching to the next one.`);
+      account.limitExceeded = true;
+      currentAccountIndex = (currentAccountIndex + 1) % emailAccounts.length;
+    }
     return true;
   } catch (error) {
-    console.error(`❌ Error sending email to ${to} from ${account.senderEmail} using Brevo:`, error);
+    console.error(`[ERROR]🚫Error sending email to ${to} from ${account.senderEmail} using Gmail SMTP:`, error);
 
     // Any error will cause a switch to the next account.
-    console.log(`🚫 Error with account ${account.senderEmail}. Switching to the next one.`);
+    console.log(`[ERROR]🚫Error with account ${account.senderEmail}. Switching to the next one.`);
     emailAccounts[currentAccountIndex].limitExceeded = true;
     currentAccountIndex = (currentAccountIndex + 1) % emailAccounts.length;
 
     if (emailAccounts.every(acc => acc.limitExceeded)) {
-      console.log('All email accounts have exceeded their limits. Pausing email sending.');
+      console.log('[INFO]🚫All email accounts have exceeded their limits. Pausing email sending and initiating hourly probe.');
       emailSendingPaused = true;
-      // Reset limits for the next day's probing
-      setTimeout(() => {
-        emailAccounts.forEach(acc => acc.limitExceeded = false);
-        emailSendingPaused = false;
-        console.log('Reset email account limits.');
-      }, 24 * 60 * 60 * 1000);
+      limitCheckPaused = true;
+      // Clear any existing probe interval to avoid duplicates
+      if (probeInterval) clearInterval(probeInterval);
+      // Set up hourly probe, only during working hours
+      probeInterval = setInterval(() => {
+        if (isAllowedTime()) {
+          probeEmailQueue();
+        } else {
+          console.log('[INFO]⏰ Hourly probe skipped: Outside of working hours.');
+        }
+      }, 60 * 60 * 1000); // Check every hour
     }
     return false;
   }
 }
 
 async function probeEmailQueue() {
-  if (!isAllowedTime() || !limitCheckPaused) {
-    if (!isAllowedTime()) {
-      console.log('Probe check skipped: Outside of working hours.');
-    }
+  if (!isAllowedTime()) {
+    console.log('[INFO]⏰ Probe check skipped: Outside of working hours.');
+    return;
+  }
+  if (!limitCheckPaused) {
     return;
   }
 
-  console.log('3-hourly check: Probing to see if Gmail sending limit is lifted...');
+  console.log('[INFO]⏰ Hourly check: Probing to see if Gmail SMTP sending limit is lifted...');
   const leads = loadLeads();
   const unsentLead = leads.find(lead => !lead.emailsSent && lead.emails.length > 0);
 
   if (!unsentLead) {
-    console.log('Probe check: No more unsent emails found. Stopping 3-hourly checks.');
+    console.log('[INFO]⏰ Probe check: No more unsent emails found. Stopping hourly checks.');
     limitCheckPaused = false;
     emailSendingPaused = false;
     if (probeInterval) clearInterval(probeInterval);
@@ -209,23 +253,29 @@ async function probeEmailQueue() {
 
   // Use the first account for probing
   currentAccountIndex = 0;
-  setupTransporter();
+  // Ensure transporter is created for the probing account
+  if (!emailAccounts[currentAccountIndex].transporter) {
+    emailAccounts[currentAccountIndex].transporter = createTransporter(emailAccounts[currentAccountIndex]);
+  }
 
   // Try sending the first email of the first unsent lead
   const emailToSend = unsentLead.emails[0];
   const success = await sendEmail(emailToSend, unsentLead);
 
   if (success) {
-    console.log('Probe successful! Gmail limit has been lifted. Resuming normal email sending.');
+    console.log('Probe successful! Gmail SMTP limit has been lifted. Resuming normal email sending.');
     limitCheckPaused = false;
     emailSendingPaused = false;
-    emailAccounts.forEach(acc => acc.limitExceeded = false); // Reset all account limits
+    emailAccounts.forEach(acc => {
+      acc.limitExceeded = false;
+      acc.emailsSentToday = 0; // Reset daily counter
+    });
     if (probeInterval) clearInterval(probeInterval);
     // Immediately trigger the main processor
     emailQueueProcessor();
   } else {
     // The sendEmail function will have already logged the specific error
-    console.log('Probe failed. Gmail limit is still in effect. Will check again in 3 hours.');
+    console.log('Probe failed. Gmail SMTP limit is still in effect. Will check again in 1 hour.');
   }
 }
 
@@ -234,8 +284,17 @@ async function probeEmailQueue() {
 const sentEmailsGlobal = new Set();
 
 async function emailQueueProcessor() {
+  // Daily reset of emailsSentToday
+  const now = new Date();
+  const today = now.toDateString();
+  if (!global.lastResetDay || global.lastResetDay !== today) {
+    emailAccounts.forEach(acc => acc.emailsSentToday = 0);
+    global.lastResetDay = today;
+    console.log('[INFO]⏰ Daily email send count reset for all accounts.');
+  }
+
   if (!isAllowedTime()) {
-    console.log('⏰ Outside of working hours. Email queue processor will not run.');
+    console.log('[INFO]⏰ Outside of working hours. Email queue processor will not run.');
     return;
   }
   if (emailSendingPaused || limitCheckPaused) {
@@ -611,7 +670,7 @@ async function main(io) {
       const shuffledIndustries = shuffleArray([...CONFIG.industries]);
 
       for (const industry of shuffledIndustries) {
-        console.log(`\n🔎 Searching websites for industry: ${industry}`);
+        console.log(`\n🔎Searching websites for industry: ${industry}`);
 
         const websites = await getWebsitesByIndustry(industry, browser);
         console.log(`Found ${websites.length} websites.`);
@@ -624,7 +683,7 @@ async function main(io) {
 
           const emails = await extractEmailsFromWebsite(website, browser);
           if (emails.length > 0) {
-            console.log(`✅ Found ${emails.length} emails on ${website}`);
+            console.log(`✅Found ${emails.length} emails on ${website}`);
             const lead = {
               website,
               emails,
@@ -640,7 +699,7 @@ async function main(io) {
         }
       }
 
-      console.log('\n✅ Finished scraping all industries. Restarting in a bit...');
+      console.log('\n🔎Finished scraping all industries. Restarting in a bit...');
       await wait(10000); // Wait for 10 seconds before the next big loop
     } catch (error) {
       console.error('A critical error occurred in the main loop:', error);
