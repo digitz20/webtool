@@ -47,6 +47,7 @@ const CONFIG = {
     'Electrical', 'Transportation Equipment', 'Furniture Manufacturing', 'Toy', 'Sporting Goods Manufacturing' 
     
   ],
+  
   googleResultsPerSearch: 20,
   maxPagesToVisit: 40,
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
