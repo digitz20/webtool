@@ -304,77 +304,64 @@ async function emailQueueProcessor() {
     return;
   }
 
-  console.log('Running email queue processor...');
+  console.log('Running email queue processor...'); // Modified log
+  sentEmailsGlobal.clear(); // Clear the global set at the beginning of each run
   const leads = loadLeads();
 
-  // Re-initialize the global sent emails set from the source of truth
-  sentEmailsGlobal.clear();
-  const sentLeadsFile = path.join(__dirname, 'sent_leads.json');
-  if (fs.existsSync(sentLeadsFile)) {
-    try {
-      const existingSentLeads = JSON.parse(fs.readFileSync(sentLeadsFile));
-      existingSentLeads.forEach(lead => {
-        if (lead.sentEmailLinks) {
-          lead.sentEmailLinks.forEach(email => sentEmailsGlobal.add(email.toLowerCase()));
-        }
-      });
-      console.log(`Refreshed global sent email set with ${sentEmailsGlobal.size} addresses from sent_leads.json`);
-    } catch (error) {
-      console.error('Error reading or parsing sent_leads.json:', error);
-    }
-  }
-
   const unsentLeads = leads.filter(lead => !lead.emailsSent);
+  console.log(`✅Found ${unsentLeads.length} unsent leads after filtering.`); // Added log
 
   if (unsentLeads.length === 0) {
-    console.log('No unsent leads to process.');
+    console.log('❌No unsent leads to process.'); // Modified log
     return;
   }
 
-  console.log(`Found ${unsentLeads.length} leads with unsent emails.`);
+  console.log(`✅Found ${unsentLeads.length} leads with unsent emails.`); // Modified log
 
   for (const lead of unsentLeads) {
     if (!lead.emails || lead.emails.length === 0) {
       lead.emailsSent = true;
+      console.log(`Lead ${lead.website} has no emails. Marking as sent.`); // Added log
       continue;
     }
 
-    if (!lead.sentEmailLinks) {
-      lead.sentEmailLinks = [];
-    }
+    // if (!lead.sentEmailLinks) {
+    //   lead.sentEmailLinks = [];
+    // }
 
     const emailsToSend = lead.emails.filter(email => !sentEmailsGlobal.has(email.toLowerCase()));
 
     if (emailsToSend.length === 0) {
       // All emails for this lead were already sent in previous runs
       lead.emailsSent = true;
+      console.log(`✅All emails for lead ${lead.website} already sent. Marking as sent.`); // Added log
       continue;
     }
 
     const uniqueEmailsToSend = [...new Set(emailsToSend)];
-    console.log(`Lead ${lead.website} has ${uniqueEmailsToSend.length} unique email(s) to send.`);
+    console.log(`Lead ${lead.website} has ${uniqueEmailsToSend.length} unique email(s) to send.`); // Modified log
 
     for (const email of uniqueEmailsToSend) {
       if (emailSendingPaused) {
-        console.log('Email sending paused. Breaking from email loop.');
+        console.log('⏰Email sending paused. Breaking from email loop.'); // Modified log
         break; // Break from sending emails for the CURRENT lead
       }
 
       const success = await sendEmail(email, lead);
       if (success) {
-        console.log(`Successfully sent email to ${email}. Marking lead as sent to be moved at the end of the cycle.`);
+        console.log(`✅ Successfully sent email to ${email}. Marking lead as sent to be moved at the end of the cycle.`); // Modified log
         sentEmailsGlobal.add(email.toLowerCase());
-        lead.sentEmailLinks.push(email);
+        // lead.sentEmailLinks.push(email);
         lead.emailsSent = true; // Mark the entire lead as sent
         await wait(randomInt(CONFIG.emailDelay.min, CONFIG.emailDelay.max));
         break; // Exit email loop for this lead and move to the next
       } else {
         // If sendEmail returns false, the account is likely limited.
         if (emailSendingPaused) {
-          console.log('Email sending limit reached. Pausing queue processor.');
+          console.log('🚫Email sending limit reached. Pausing queue processor.'); // Modified log
           break; // Break from the email loop
         }
-        console.log(`Failed to send to ${email}, will retry in the next cycle.`);
+        console.log(`❌Failed to send to ${email}, will retry in the next cycle.`); // Modified log
         // Don't break here, maybe it was a transient issue with one email.
         // The main pause logic will handle stopping.
       }
@@ -382,25 +369,25 @@ async function emailQueueProcessor() {
 
     // After trying to send emails for a lead, check if we need to stop processing more leads.
     if (emailSendingPaused) {
-        console.log('Email sending is paused. Stopping lead processing for this cycle.');
+        console.log('🚫Email sending is paused. Stopping lead processing for this cycle.'); // Modified log
         break; // Break from the main lead loop
     }
   }
 
-  console.log('Email queue processing cycle finished. Saving state...');
+  console.log('Email queue processing cycle finished. Saving state...'); // Modified log
   const leadsToKeep = leads.filter(lead => !lead.emailsSent);
   const leadsToMove = leads.filter(lead => lead.emailsSent);
 
   if (leadsToMove.length > 0) {
-    saveSentLeads(leadsToMove);
+    // saveSentLeads(leadsToMove); // Removed this line
     saveLeads(leadsToKeep);
-    console.log(`Moved ${leadsToMove.length} leads to sent_leads.json.`);
+    console.log(`Deleted ${leadsToMove.length} leads that had all emails sent.`); // Modified log
   } else {
     // Save partial progress if any emails were sent but no leads were fully completed
     saveLeads(leads);
   }
 
-  console.log('Email queue processing finished for this cycle.');
+  console.log('✅Email queue processing finished for this cycle.'); // Modified log
 }
 
 
@@ -455,16 +442,16 @@ function saveLeads(leads) {
   fs.writeFileSync(CONFIG.dataFile, JSON.stringify(leads, null, 2));
 }
 
-function saveSentLeads(sentLeads) {
-  const sentLeadsFile = path.join(__dirname, 'sent_leads.json');
-  console.log(`Moving ${sentLeads.length} completed lead(s) to ${sentLeadsFile}`);
-  let existingSentLeads = [];
-  if (fs.existsSync(sentLeadsFile)) {
-    existingSentLeads = JSON.parse(fs.readFileSync(sentLeadsFile));
-  }
-  const allSentLeads = existingSentLeads.concat(sentLeads);
-  fs.writeFileSync(sentLeadsFile, JSON.stringify(allSentLeads, null, 2));
-}
+// function saveSentLeads(sentLeads) {
+//   const sentLeadsFile = path.join(__dirname, 'sent_leads.json');
+//   console.log(`Moving ${sentLeads.length} completed lead(s) to ${sentLeadsFile}`);
+//   let existingSentLeads = [];
+//   if (fs.existsSync(sentLeadsFile)) {
+//     existingSentLeads = JSON.parse(fs.readFileSync(sentLeadsFile));
+//   }
+//   const allSentLeads = existingSentLeads.concat(sentLeads);
+//   fs.writeFileSync(sentLeadsFile, JSON.stringify(allSentLeads, null, 2));
+// }
 
 // ---------- SCRAPING ----------
 async function getWebsitesByIndustry(industry, browser) {
@@ -669,13 +656,14 @@ async function main(io) {
   while (true) {
     try {
       const leads = loadLeads();
+      console.log(`Loaded ${leads.length} existing leads.`); // Added log
       const shuffledIndustries = shuffleArray([...CONFIG.industries]);
 
       for (const industry of shuffledIndustries) {
         console.log(`\n🔎Searching websites for industry: ${industry}`);
 
         const websites = await getWebsitesByIndustry(industry, browser);
-        console.log(`Found ${websites.length} websites.`);
+        console.log(`✅Found ${websites.length} websites for industry ${industry}.`); // Added log
 
         for (const website of websites) {
           if (leads.some(l => l.website === website)) {
@@ -696,7 +684,10 @@ async function main(io) {
             };
             leads.push(lead);
             saveLeads(leads);
+            console.log(`Saved new lead for ${website}. Total leads: ${leads.length}`); // Added log
             io.emit('new-lead', lead);
+          } else {
+            console.log(`No emails found for ${website}.`); // Added log
           }
         }
       }
