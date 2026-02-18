@@ -748,3 +748,5 @@ async function main(io) {
 }
 
 module.exports = { main };
+
+main()

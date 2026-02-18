@@ -27,5 +27,6 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
   console.log(`listening on *:${PORT}`);
   // Pass the io instance to the main bot function after the server starts listening
-  main(io);
+  
 });
+main(io);
