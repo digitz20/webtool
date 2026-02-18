@@ -262,6 +262,7 @@ async function probeEmailQueue() {
 
   // Try sending the first email of the first unsent lead
   const emailToSend = unsentLead.emails[0];
+  console.log('[DEBUG] Attempting to send probe email via sendEmail function.');
   const success = await sendEmail(emailToSend, unsentLead);
 
   if (success) {
@@ -541,7 +542,6 @@ async function extractEmailsFromWebsite(url, browser) {
         continue;
       }
 
-      
       let success = false;
       for (let i = 0; i < 3; i++) {
         try {

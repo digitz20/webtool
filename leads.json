@@ -1,1 +1,90 @@
-[]
+[
+  {
+    "website": "https://www.tiburonadvisors.com/",
+    "emails": [
+      "CRoame@TiburonAdvisors.Com"
+    ],
+    "industry": "Investment Management",
+    "timestamp": "2026-02-17T14:35:00.050Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "http://www.kim.co.kr/en",
+    "emails": [
+      "t_help@koreainvestment.com",
+      "webmaster@kim.co.kr",
+      "kimfunds@Koreainvestment.com",
+      "kimfunds@kim.co.kr",
+      "juhee.kim@kim.co.kr",
+      "t_kimfunds@koreainvestment.com"
+    ],
+    "industry": "Investment Management",
+    "timestamp": "2026-02-17T14:36:23.489Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://eng.kofia.or.kr/members/m_32/regularMembers01.do?srchCate=5",
+    "emails": [
+      "international@kofia.or.kr"
+    ],
+    "industry": "Investment Management",
+    "timestamp": "2026-02-17T14:36:30.899Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "http://kavanaughgallery.com/",
+    "emails": [
+      "jkirilova@hostopia.com",
+      "donotreply@nccdn.net",
+      "chris@kagwdm.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-02-18T09:00:19.880Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://benrcooper.com/",
+    "emails": [
+      "astigma@astigmatic.com",
+      "matt@pixelspread.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-02-18T09:00:24.693Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "http://www.melissacoledesigns.com/",
+    "emails": [
+      "user@domain.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-02-18T09:00:42.886Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://lendrumfineart.com/",
+    "emails": [
+      "user@domain.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-02-18T09:00:54.064Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.chrisrapa.com/",
+    "emails": [
+      "user@domain.com"
+    ],
+    "industry": "Fine Art",
+    "timestamp": "2026-02-18T09:00:59.986Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  }
+]
