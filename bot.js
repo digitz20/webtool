@@ -296,6 +296,15 @@ async function emailQueueProcessor() {
     console.log('[INFO]⏰ Daily email send count reset for all accounts.');
   }
 
+  // Hourly check at 8 AM to send email if paused
+  if (now.getHours() === 8 && limitCheckPaused) {
+    console.log('[INFO]⏰ It\'s 8 AM and email sending is paused. Initiating hourly probe.');
+    await probeEmailQueue();
+    // After probing, if limits are lifted, emailQueueProcessor will be called again.
+    // If limits are still in effect, it will remain paused.
+    return; // Exit this run of emailQueueProcessor, it will be re-triggered if probe is successful
+  }
+
   if (!isAllowedTime()) {
     console.log('[INFO]⏰ Outside of working hours. Email queue processor will not run.');
     return;
