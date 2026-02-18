@@ -368,12 +368,12 @@ async function emailQueueProcessor() {
         }
 
         // If there are no more emails for this lead, mark it as fully sent
-        if (lead.emails.length === 0) {
+        // if (lead.emails.length === 0) {
           lead.emailsSent = true;
-          console.log(`✅ All emails for lead ${lead.website} have been sent. Marking lead as sent.`);
-        } else {
-          console.log(`✅ Email sent for lead ${lead.website}. Remaining emails: ${lead.emails.length}.`);
-        }
+          console.log(`✅ Email sent for lead ${lead.website}. Marking lead as sent.`);
+        // } else {
+        //   console.log(`✅ Email sent for lead ${lead.website}. Remaining emails: ${lead.emails.length}.`);
+        // }
         await wait(randomInt(CONFIG.emailDelay.min, CONFIG.emailDelay.max));
         break; // Exit email loop for this lead and move to the next
       } else {
@@ -627,6 +627,7 @@ async function extractEmailsFromWebsite(url, browser) {
       await page.close();
     }
   }
+  
 
   const genericPrefixes = ['info', 'support', 'contact', 'sales', 'admin', 'hello', 'help', 'media', 'press', 'jobs', 'careers', 'privacy'];
   const publicDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com', 'icloud.com', 'protonmail.com', 'zoho.com', 'yandex.com', 'mail.com', 'sentry.io', 'wixpress.com'];
