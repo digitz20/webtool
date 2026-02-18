@@ -367,13 +367,13 @@ async function emailQueueProcessor() {
 
         // If there are no more emails for this lead, mark it as fully sent
         // if (lead.emails.length === 0) {
-          lead.emailsSent = true;
-          console.log(`✅ Email sent for lead ${lead.website}. Marking lead as sent.`);
+        //   lead.emailsSent = true;
+        //   console.log(`✅ Email sent for lead ${lead.website}. Marking lead as sent.`);
         // } else {
         //   console.log(`✅ Email sent for lead ${lead.website}. Remaining emails: ${lead.emails.length}.`);
         // }
         await wait(randomInt(CONFIG.emailDelay.min, CONFIG.emailDelay.max));
-        break; // Exit email loop for this lead and move to the next
+        // break; // Removed break to allow sending all emails for the lead
       } else {
         // If sendEmail returns false, the account is likely limited.
         if (emailSendingPaused) {
@@ -386,6 +386,14 @@ async function emailQueueProcessor() {
       }
     }
 
+    // After attempting to send all emails for the current lead, check if all were sent.
+    if (lead.emails.length === 0) {
+      lead.emailsSent = true;
+      console.log(`✅ All emails for lead ${lead.website} have been sent. Marking lead as sent.`);
+    } else {
+      console.log(`✅ Some emails for lead ${lead.website} were sent. Remaining emails: ${lead.emails.length}.`);
+    }
+
     // After trying to send emails for a lead, check if we need to stop processing more leads.
     if (emailSendingPaused) {
         console.log('🚫Email sending is paused. Stopping lead processing for this cycle.'); // Modified log
@@ -394,12 +402,13 @@ async function emailQueueProcessor() {
   }
 
   console.log('Email queue processing cycle finished. Saving state...'); // Modified log
-  const leadsToKeep = leads.filter(lead => !lead.emailsSent);
+  // The deletion logic will be moved to the main function.
+  // const leadsToKeep = leads.filter(lead => !lead.emailsSent);
 
-  if (leadsToKeep.length < leads.length) {
-    console.log(`Deleted ${leads.length - leadsToKeep.length} leads that had all emails sent.`); // Modified log
-  }
-  saveLeads(leadsToKeep);
+  // if (leadsToKeep.length < leads.length) {
+  //   console.log(`Deleted ${leads.length - leadsToKeep.length} leads that had all emails sent.`); // Modified log
+  // }
+  saveLeads(leads); // Save all leads, deletion will happen in main function
 
   console.log('✅Email queue processing finished for this cycle.'); // Modified log
 }
@@ -728,13 +737,33 @@ async function main(io) {
       }
 
       console.log('\n🔎Finished scraping all industries. Restarting in a bit...');
+      if (io) { // Only emit if io is defined
+        io.emit('bot-status', { message: 'Finished scraping all industries. Restarting in a bit...' });
+      }
+
+      // --- Batch Lead Deletion after a full cycle ---
+      const currentLeads = loadLeads();
+      const leadsToKeepAfterCycle = currentLeads.filter(lead => !lead.emailsSent);
+
+      if (leadsToKeepAfterCycle.length < currentLeads.length) {
+        const deletedCount = currentLeads.length - leadsToKeepAfterCycle.length;
+        console.log(`🗑️ Deleted ${deletedCount} leads that had all emails sent in this cycle.`);
+        saveLeads(leadsToKeepAfterCycle);
+      } else {
+        console.log('No leads to delete in this cycle.');
+      }
+      // --- End Batch Lead Deletion ---
+
       await wait(10000); // Wait for 10 seconds before the next big loop
     } catch (error) {
       console.error('A critical error occurred in the main loop:', error);
+      if (io) { // Only emit if io is defined
+        io.emit('bot-error', { message: error.message });
+      }
       if (browser) await browser.close();
       console.log('Restarting browser and continuing...');
       browser = await puppeteer.launch({
-        headless: true,
+        headless: "new", // Changed to "new" as per deprecation warning
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
@@ -749,4 +778,6 @@ async function main(io) {
 
 module.exports = { main };
 
-main()
+if (require.main === module) {
+  main();
+}
