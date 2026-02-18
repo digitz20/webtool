@@ -315,7 +315,7 @@ async function emailQueueProcessor() {
   }
 
   console.log('Running email queue processor...'); // Modified log
-  sentEmailsGlobal.clear(); // Clear the global set at the beginning of each run
+  const sentEmailsGlobal = loadSentEmails(); // Load previously sent emails
   const leads = loadLeads();
 
   const unsentLeads = leads.filter(lead => !lead.emailsSent);
@@ -335,16 +335,12 @@ async function emailQueueProcessor() {
       continue;
     }
 
-    // if (!lead.sentEmailLinks) {
-    //   lead.sentEmailLinks = [];
-    // }
-
     const emailsToSend = lead.emails.filter(email => !sentEmailsGlobal.has(email.toLowerCase()));
 
     if (emailsToSend.length === 0) {
       // All emails for this lead were already sent in previous runs
       lead.emailsSent = true;
-      console.log(`✅All emails for lead ${lead.website} already sent. Marking as sent.`); // Added log
+      console.log(`✅All emails for lead ${lead.website} already sent or in global sent list. Marking as sent.`); // Added log
       continue;
     }
 
@@ -361,6 +357,8 @@ async function emailQueueProcessor() {
       if (success) {
         console.log(`✅ Successfully sent email to ${email}.`); // Modified log
         sentEmailsGlobal.add(email.toLowerCase());
+        saveSentEmails(sentEmailsGlobal); // Save updated sent emails
+
         // Remove the sent email from the lead's emails array
         const emailIndex = lead.emails.findIndex(e => e.toLowerCase() === email.toLowerCase());
         if (emailIndex > -1) {
@@ -456,6 +454,20 @@ function loadLeads() {
 
 function saveLeads(leads) {
   fs.writeFileSync(CONFIG.dataFile, JSON.stringify(leads, null, 2));
+}
+
+const SENT_EMAILS_FILE = path.join(__dirname, 'sent_emails.json');
+
+function loadSentEmails() {
+  if (fs.existsSync(SENT_EMAILS_FILE)) {
+    const data = fs.readFileSync(SENT_EMAILS_FILE, 'utf8');
+    return new Set(JSON.parse(data));
+  }
+  return new Set();
+}
+
+function saveSentEmails(sentEmails) {
+  fs.writeFileSync(SENT_EMAILS_FILE, JSON.stringify(Array.from(sentEmails), null, 2));
 }
 
 // function saveSentLeads(sentLeads) {
