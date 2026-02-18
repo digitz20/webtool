@@ -9,6 +9,26 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 
 
+// Function to load leads from leads.json
+function loadLeads() {
+  try {
+    const data = fs.readFileSync(path.join(__dirname, 'leads.json'), 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error loading leads.json:', error);
+    return [];
+  }
+}
+
+// Function to save leads to leads.json
+function saveLeads(leads) {
+  try {
+    fs.writeFileSync(path.join(__dirname, 'leads.json'), JSON.stringify(leads, null, 2), 'utf8');
+  } catch (error) {
+    console.error('Error saving leads.json:', error);
+  }
+}
+
 // ---------- CONFIG ----------
 const CONFIG = {
   industries: [
@@ -345,7 +365,7 @@ async function emailQueueProcessor() {
     }
 
     const uniqueEmailsToSend = [...new Set(emailsToSend)];
-    console.log(`Lead ${lead.website} has ${uniqueEmailsToSend.length} unique email(s) to send.`); // Modified log
+    console.log(`Lead ${lead.website} has ${uniqueEmailsToSend.length} unique email(s) to send. Initial lead.emails length: ${lead.emails.length}`); // Modified log
 
     for (const email of uniqueEmailsToSend) {
       if (emailSendingPaused) {
@@ -363,6 +383,7 @@ async function emailQueueProcessor() {
         const emailIndex = lead.emails.findIndex(e => e.toLowerCase() === email.toLowerCase());
         if (emailIndex > -1) {
           lead.emails.splice(emailIndex, 1);
+          console.log(`Removed ${email} from lead.emails. Remaining emails: ${lead.emails.length}`); // Added log
         }
 
         // If there are no more emails for this lead, mark it as fully sent
@@ -372,7 +393,7 @@ async function emailQueueProcessor() {
         // } else {
         //   console.log(`✅ Email sent for lead ${lead.website}. Remaining emails: ${lead.emails.length}.`);
         // }
-        await wait(randomInt(CONFIG.emailDelay.min, CONFIG.emailDelay.max));
+        // await wait(randomInt(CONFIG.emailDelay.min, CONFIG.emailDelay.max)); // REMOVED: Delay moved outside inner loop
         // break; // Removed break to allow sending all emails for the lead
       } else {
         // If sendEmail returns false, the account is likely limited.
@@ -389,9 +410,9 @@ async function emailQueueProcessor() {
     // After attempting to send all emails for the current lead, check if all were sent.
     if (lead.emails.length === 0) {
       lead.emailsSent = true;
-      console.log(`✅ All emails for lead ${lead.website} have been sent. Marking lead as sent.`);
+      console.log(`✅ All emails for lead ${lead.website} have been sent. Marking lead as sent. lead.emailsSent: ${lead.emailsSent}`); // Modified log
     } else {
-      console.log(`✅ Some emails for lead ${lead.website} were sent. Remaining emails: ${lead.emails.length}.`);
+      console.log(`✅ Some emails for lead ${lead.website} were sent. Remaining emails: ${lead.emails.length}. lead.emailsSent: ${lead.emailsSent}`); // Modified log
     }
 
     // After trying to send emails for a lead, check if we need to stop processing more leads.
@@ -399,16 +420,20 @@ async function emailQueueProcessor() {
         console.log('🚫Email sending is paused. Stopping lead processing for this cycle.'); // Modified log
         break; // Break from the main lead loop
     }
+
+    // ADDED: Delay after processing all emails for a single lead
+    await wait(randomInt(CONFIG.emailDelay.min, CONFIG.emailDelay.max));
   }
 
   console.log('Email queue processing cycle finished. Saving state...'); // Modified log
-  // The deletion logic will be moved to the main function.
-  // const leadsToKeep = leads.filter(lead => !lead.emailsSent);
+  const leadsToKeep = leads.filter(lead => !lead.emailsSent);
 
-  // if (leadsToKeep.length < leads.length) {
-  //   console.log(`Deleted ${leads.length - leadsToKeep.length} leads that had all emails sent.`); // Modified log
-  // }
-  saveLeads(leads); // Save all leads, deletion will happen in main function
+  if (leadsToKeep.length < leads.length) {
+    console.log(`Deleted ${leads.length - leadsToKeep.length} leads that had all emails sent.`); // Modified log
+  }
+  // Save the remaining leads (those not marked as emailsSent = true)
+  console.log(`Saving ${leadsToKeep.length} leads to leads.json.`);
+  saveLeads(leadsToKeep);
 
   console.log('✅Email queue processing finished for this cycle.'); // Modified log
 }
@@ -740,20 +765,6 @@ async function main(io) {
       if (io) { // Only emit if io is defined
         io.emit('bot-status', { message: 'Finished scraping all industries. Restarting in a bit...' });
       }
-
-      // --- Batch Lead Deletion after a full cycle ---
-      const currentLeads = loadLeads();
-      const leadsToKeepAfterCycle = currentLeads.filter(lead => !lead.emailsSent);
-
-      if (leadsToKeepAfterCycle.length < currentLeads.length) {
-        const deletedCount = currentLeads.length - leadsToKeepAfterCycle.length;
-        console.log(`🗑️ Deleted ${deletedCount} leads that had all emails sent in this cycle.`);
-        saveLeads(leadsToKeepAfterCycle);
-      } else {
-        console.log('No leads to delete in this cycle.');
-      }
-      // --- End Batch Lead Deletion ---
-
       await wait(10000); // Wait for 10 seconds before the next big loop
     } catch (error) {
       console.error('A critical error occurred in the main loop:', error);
