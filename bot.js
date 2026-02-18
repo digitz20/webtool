@@ -629,6 +629,8 @@ async function extractEmailsFromWebsite(url, browser) {
   }
   
 
+
+
   const genericPrefixes = ['info', 'support', 'contact', 'sales', 'admin', 'hello', 'help', 'media', 'press', 'jobs', 'careers', 'privacy'];
   const publicDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com', 'icloud.com', 'protonmail.com', 'zoho.com', 'yandex.com', 'mail.com', 'sentry.io', 'wixpress.com'];
 
