@@ -359,10 +359,21 @@ async function emailQueueProcessor() {
 
       const success = await sendEmail(email, lead);
       if (success) {
-        console.log(`✅ Successfully sent email to ${email}. Marking lead as sent to be moved at the end of the cycle.`); // Modified log
+        console.log(`✅ Successfully sent email to ${email}.`); // Modified log
         sentEmailsGlobal.add(email.toLowerCase());
-        // lead.sentEmailLinks.push(email);
-        lead.emailsSent = true; // Mark the entire lead as sent
+        // Remove the sent email from the lead's emails array
+        const emailIndex = lead.emails.findIndex(e => e.toLowerCase() === email.toLowerCase());
+        if (emailIndex > -1) {
+          lead.emails.splice(emailIndex, 1);
+        }
+
+        // If there are no more emails for this lead, mark it as fully sent
+        if (lead.emails.length === 0) {
+          lead.emailsSent = true;
+          console.log(`✅ All emails for lead ${lead.website} have been sent. Marking lead as sent.`);
+        } else {
+          console.log(`✅ Email sent for lead ${lead.website}. Remaining emails: ${lead.emails.length}.`);
+        }
         await wait(randomInt(CONFIG.emailDelay.min, CONFIG.emailDelay.max));
         break; // Exit email loop for this lead and move to the next
       } else {
@@ -386,16 +397,11 @@ async function emailQueueProcessor() {
 
   console.log('Email queue processing cycle finished. Saving state...'); // Modified log
   const leadsToKeep = leads.filter(lead => !lead.emailsSent);
-  const leadsToMove = leads.filter(lead => lead.emailsSent);
 
-  if (leadsToMove.length > 0) {
-    // saveSentLeads(leadsToMove); // Removed this line
-    saveLeads(leadsToKeep);
-    console.log(`Deleted ${leadsToMove.length} leads that had all emails sent.`); // Modified log
-  } else {
-    // Save partial progress if any emails were sent but no leads were fully completed
-    saveLeads(leads);
+  if (leadsToKeep.length < leads.length) {
+    console.log(`Deleted ${leads.length - leadsToKeep.length} leads that had all emails sent.`); // Modified log
   }
+  saveLeads(leadsToKeep);
 
   console.log('✅Email queue processing finished for this cycle.'); // Modified log
 }
