@@ -669,7 +669,11 @@ async function main(io) {
     ],
   });
 
-  
+  // Start email queue processor
+  emailQueueProcessor(); // Run once immediately
+  setInterval(emailQueueProcessor, 300000); // Then every 5 minutes
+  console.log('[INFO] Email queue processor started, running every 5 minutes.');
+
   while (true) {
     try {
       const leads = loadLeads();
@@ -730,3 +734,5 @@ async function main(io) {
 }
 
 module.exports = { main };
+
+main();
