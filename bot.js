@@ -307,17 +307,15 @@ async function probeEmailQueue() {
 const sentEmailsGlobal = new Set();
 
 async function emailQueueProcessor() {
-  // Daily reset of emailsSentToday
   const now = new Date();
   const today = now.toDateString();
-// In bot.js
-if (!global.lastResetDay || global.lastResetDay !== today) {
-  emailAccounts.forEach(acc => acc.emailsSentToday = 0);
-  global.lastResetDay = today;
-  emailSendingPaused = false; // Reset email sending pause
-  limitCheckPaused = false; // Reset limit check pause
-  console.log('[INFO]⏰ Daily email send count and pause states reset for all accounts.');
-}
+  if (!global.lastResetDay || global.lastResetDay !== today) {
+    emailAccounts.forEach(acc => acc.emailsSentToday = 0);
+    global.lastResetDay = today;
+    emailSendingPaused = false; // Reset email sending pause
+    limitCheckPaused = false; // Reset limit check pause
+    console.log('[INFO]⏰ Daily email send count and pause states reset for all accounts.');
+  }
 
   // Hourly check at 8 AM to send email if paused
   if (now.getHours() === 8 && limitCheckPaused) {
