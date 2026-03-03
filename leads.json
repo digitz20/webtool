@@ -587,5 +587,109 @@
     "timestamp": "2026-02-26T15:28:08.274Z",
     "emailsSent": false,
     "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.osg.com/",
+    "emails": [
+      "email@example.com"
+    ],
+    "industry": "Refined Petroleum",
+    "timestamp": "2026-03-03T00:38:58.058Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.tidewater.com/",
+    "emails": [
+      "jennifer.riddle@tidewater.com",
+      "JENNIFER.RIDDLE@TIDEWATER.COM",
+      "605a7baede844d278b89dc95ae0a9123@sentry-next.wixpress.com",
+      "18d2f96d279149989b95faf0a4b41882@sentry-next.wixpress.com",
+      "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com",
+      "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com",
+      "5d1795a2db124a268f1e1bd88f503500@sentry.wixpress.com"
+    ],
+    "industry": "Refined Petroleum",
+    "timestamp": "2026-03-03T00:39:08.230Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://brandonpetroleum.ca/",
+    "emails": [
+      "bwells@brandonpetroleum.ca"
+    ],
+    "industry": "Refined Petroleum",
+    "timestamp": "2026-03-03T00:39:17.727Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "http://www.radintrade.com/",
+    "emails": [
+      "Procurement@radintrade.com",
+      "procurement@radintrade.com"
+    ],
+    "industry": "Refined Petroleum",
+    "timestamp": "2026-03-03T00:39:37.481Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "http://bitzrealty.com/",
+    "emails": [
+      "hidesteven@bitzrealty.com",
+      "steven@bitzrealty.com",
+      "hidevince@bitzrealty.com",
+      "vince@bitzrealty.com",
+      "hidenoah@bitzrealty.com",
+      "noah@bitzrealty.com",
+      "hideleann@bitzrealty.com",
+      "leann@bitzrealty.com"
+    ],
+    "industry": "Real Estate",
+    "timestamp": "2026-03-03T00:42:15.011Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://cleancities.energy.gov/",
+    "emails": [
+      "technicalresponse@icf.com"
+    ],
+    "industry": "Renewable Energy",
+    "timestamp": "2026-03-03T10:37:18.786Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.energy.noaa.gov/",
+    "emails": [
+      "webmaster.esrl@noaa.gov"
+    ],
+    "industry": "Renewable Energy",
+    "timestamp": "2026-03-03T10:37:38.747Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://dps.ny.gov/ores",
+    "emails": [
+      "ores@dps.ny.gov"
+    ],
+    "industry": "Renewable Energy",
+    "timestamp": "2026-03-03T10:39:25.961Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
+  },
+  {
+    "website": "https://www.newleafenergy.com/",
+    "emails": [
+      "user@domain.com"
+    ],
+    "industry": "Renewable Energy",
+    "timestamp": "2026-03-03T10:40:03.780Z",
+    "emailsSent": false,
+    "sentEmailLinks": []
   }
 ]
