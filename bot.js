@@ -167,6 +167,7 @@ let limitCheckPaused = false; // New state for hourly checking
 let emailQueueProcessorInterval; // To hold the interval ID
 let pauseTimeout;
 let probeInterval;
+let lastNoLeadsLogTime = 0; // Tracks when "No unsent leads" was last logged
 
 // Helper to create transporter
 function createTransporter(account) {
@@ -343,8 +344,15 @@ async function emailQueueProcessor() {
   console.log(`✅Found ${unsentLeads.length} unsent leads after filtering.`); // Added log
 
   if (unsentLeads.length === 0) {
-    console.log('❌No unsent leads to process.'); // Modified log
-    return;
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000; // Define 1 hour in milliseconds
+
+    // Only log "No unsent leads" if it hasn't been logged in the last hour
+    if (now - lastNoLeadsLogTime > oneHour) {
+      console.log('❌No unsent leads to process. Will check again periodically.');
+      lastNoLeadsLogTime = now; // Update the last logged time
+    }
+    return; // This return is correct; it just means this specific run has nothing to send.
   }
 
   console.log(`✅Found ${unsentLeads.length} leads with unsent emails.`); // Modified log
